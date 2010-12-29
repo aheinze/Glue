@@ -7,7 +7,7 @@
 
     glue("route")->get("/", function(){
         
-        echo "Hello world"
+        echo "Hello world";
     });
     
     //--
