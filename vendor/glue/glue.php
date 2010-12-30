@@ -1,6 +1,7 @@
 <?php
     
 require_once(__DIR__.'/helpers/path.php');
+require_once(__DIR__.'/classes/glue_base.php');
 
 /*
 	Class: Glue
