@@ -18,8 +18,10 @@ class ControllerHelper {
 		Returns:
 			Void
 	*/
-	public function invoke($path, $params=array()) {
+	public function invoke($path, $params=array(), $controller_path = null) {
 		
+        $controller_path = $controller_path ? $controller_path : glue("path")->base_path;
+        
         $parsedUri = array(
             'module'     => 'app',
             'controller' => 'app',
@@ -36,7 +38,7 @@ class ControllerHelper {
             
             //check for module
             //-----------------------------------------------------
-            if(glue('path')->path('controller:'.$parts[0])){
+            if(file_exists($controller_path.'/'.$parts[0])){
               
               $parsedUri['module'] = $parts[0];
               $parts               = array_slice($parts,1);
@@ -48,9 +50,9 @@ class ControllerHelper {
                 case 1:
                 case 2:
                 
-                  $controllerFile = glue('path')->path('controller:'.$parsedUri['module'].'/'.$parts[0].'.php');
+                  $controllerFile = $controller_path.'/'.$parsedUri['module'].'/'.$parts[0].'.php';
 
-                  if(!$controllerFile){
+                  if(!file_exists($controllerFile)){
                     array_unshift($parts, $parsedUri['module']);
                   }
                   
@@ -82,8 +84,10 @@ class ControllerHelper {
         $controllerName = $parsedUri['controller'].'Controller'; 
         
         if(!class_exists($controllerName)){
-        
-            if( $controllerFile = glue('path')->path('controller:'.$parsedUri['module'].'/'.$parsedUri['controller'].'.php') ){
+            
+            $controllerFile = $controller_path.'/'.$parsedUri['module'].'/'.$parsedUri['controller'].'.php';
+            
+            if(file_exists($controllerFile)){
                 require_once($controllerFile);   
             }
         }
@@ -98,27 +102,9 @@ class ControllerHelper {
           return false;
         }
         
-        $return = null;
-
-        switch(count($parsedUri['params'])){
-          case 0:
-            $return = $controller->{$parsedUri['action']}();
-            break;
-          case 1:
-            $return = $controller->{$parsedUri['action']}($parsedUri['params'][0]);
-            break;
-          case 2:
-            $return = $controller->{$parsedUri['action']}($parsedUri['params'][0],$parsedUri['params'][1]);
-            break;
-          case 3:
-            $return = $controller->{$parsedUri['action']}($parsedUri['params'][0],$parsedUri['params'][1],$parsedUri['params'][2]);
-            break;
-          default:
-            $return = call_user_func_array(array(&$controller, $parsedUri['action']), $parsedUri['params']);
-        }
+        $return = call_user_func_array(array(&$controller, $parsedUri['action']), $parsedUri['params']);
         
         return $return;
-        
 	}
 	
 }
